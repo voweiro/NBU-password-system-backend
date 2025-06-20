@@ -85,7 +85,7 @@ JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
 JWT_EXPIRES_IN=7d
 
 # CORS Configuration
-CORS_ORIGIN=http://localhost:3000
+CORS_ORIGIN=https://nbu-password-system-frontend.vercel.app/
 
 # Rate Limiting
 RATE_LIMIT_WINDOW_MS=900000
