@@ -43,6 +43,10 @@ app.use('/api/activities', activityRoutes);
 // Error handling
 app.use(errorHandler);
 
+app.get("/", (req, res) => {
+    res.json({ success: true, message: "API is live ✅" });
+  });
+
 // Handle 404
 app.use((req, res) => {
     res.status(404).json({
