@@ -1,0 +1,58 @@
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const { errorHandler } = require('./middlewares/errorHandler');
+const logger = require('./utils/logger');
+
+// Import routes
+const authRoutes = require('./routes/auth.routes');
+const userRoutes = require('./routes/user.routes');
+const systemRoutes = require('./routes/system.routes');
+const activityRoutes = require('./routes/activity.routes');
+
+const app = express();
+
+// Security middleware
+app.use(helmet());
+app.use(cors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    credentials: true
+}));
+app.use(express.json());
+
+// Rate limiting
+const limiter = rateLimit({
+    windowMs: process.env.RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000, // 15 minutes
+    max: process.env.RATE_LIMIT_MAX || 100 // limit each IP to 100 requests per windowMs
+});
+app.use(limiter);
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// API routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/systems', systemRoutes);
+app.use('/api/activities', activityRoutes);
+
+// Error handling
+app.use(errorHandler);
+
+// Handle 404
+app.use((req, res) => {
+    res.status(404).json({
+        success: false,
+        message: 'API endpoint not found'
+    });
+});
+
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, () => {
+    logger.info(`Server is running on port ${PORT}`);
+}); 
