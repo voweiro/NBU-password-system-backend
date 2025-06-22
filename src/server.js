@@ -17,7 +17,7 @@ const app = express();
 // Security middleware
 app.use(helmet());
 
-const allowedOrigins = ['https://nbu-password-system-frontend.vercel.app', 'https://another-allowed-origin.com'];
+const allowedOrigins = ['https://nbu-password-system-frontend.vercel.app', 'http://localhost:3000'];
 app.use(cors({
     origin: function(origin, callback){
         if(!origin) return callback(null, true);
