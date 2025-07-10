@@ -16,6 +16,9 @@ const profileRoutes = require('./routes/profile.routes');
 
 const app = express();
 
+// Trust proxy for deployment platforms like Render
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet());
 
@@ -37,7 +40,8 @@ app.use(express.json());
 // Rate limiting
 const limiter = rateLimit({
     windowMs: process.env.RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000, // 15 minutes
-    max: process.env.RATE_LIMIT_MAX || 100 // limit each IP to 100 requests per windowMs
+    max: process.env.RATE_LIMIT_MAX || 100, // limit each IP to 100 requests per windowMs
+    trustProxy: true // Trust proxy headers for accurate IP identification
 });
 app.use(limiter);
 
