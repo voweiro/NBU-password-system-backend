@@ -12,6 +12,7 @@ const userRoutes = require('./routes/user.routes');
 const systemRoutes = require('./routes/system.routes');
 const activityRoutes = require('./routes/activity.routes');
 const emailRoutes = require('./routes/email.routes');
+const profileRoutes = require('./routes/profile.routes');
 
 const app = express();
 
@@ -51,6 +52,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/systems', systemRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/email', emailRoutes);
+app.use('/api/profile', profileRoutes);
 
 // Error handling
 app.use(errorHandler);

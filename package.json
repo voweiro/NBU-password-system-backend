@@ -9,7 +9,8 @@
     "test": "jest",
     "setup": "node scripts/setup-env.js",
     "init-db": "node scripts/init-db.js",
-    "create-tables": "node scripts/create-tables.js"
+    "create-tables": "node scripts/create-tables.js",
+    "check-schema": "node scripts/get-table-schemas.js"
   },
   "keywords": [],
   "author": "",
