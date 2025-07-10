@@ -1,102 +1,100 @@
 const nodemailer = require('nodemailer');
-const logger = require('../utils/logger');
 
-class EmailService {
-    constructor() {
-        this.transporter = null;
-        this.initializeTransporter();
-    }
+/**
+ * Configure email transporter
+ */
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
 
-    initializeTransporter() {
-        try {
-            // Configure email transporter based on environment variables
-            if (process.env.EMAIL_SERVICE === 'gmail') {
-                this.transporter = nodemailer.createTransport({
-                    service: 'gmail',
-                    auth: {
-                        user: process.env.EMAIL_USER,
-                        pass: process.env.EMAIL_PASSWORD // Use App Password for Gmail
-                    }
-                });
-            } else if (process.env.EMAIL_SERVICE === 'smtp') {
-                this.transporter = nodemailer.createTransport({
-                    host: process.env.SMTP_HOST,
-                    port: process.env.SMTP_PORT || 587,
-                    secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
-                    auth: {
-                        user: process.env.EMAIL_USER,
-                        pass: process.env.EMAIL_PASSWORD
-                    }
-                });
-            } else {
-                // Default to Ethereal Email for testing
-                this.createTestAccount();
-            }
-        } catch (error) {
-            logger.error('Failed to initialize email transporter:', error);
-        }
-    }
+/**
+ * Send email
+ * @param {Object} options - Email options
+ * @param {string} options.to - Recipient email
+ * @param {string} options.subject - Email subject
+ * @param {string} options.text - Plain text content
+ * @param {string} options.html - HTML content
+ * @param {Array} options.attachments - Email attachments
+ */
+exports.sendEmail = async (options) => {
+  const mailOptions = {
+    from: process.env.EMAIL_FROM,
+    to: options.to,
+    subject: options.subject,
+    text: options.text,
+    html: options.html
+  };
 
-    async createTestAccount() {
-        try {
-            const testAccount = await nodemailer.createTestAccount();
-            this.transporter = nodemailer.createTransport({
-                host: 'smtp.ethereal.email',
-                port: 587,
-                secure: false,
-                auth: {
-                    user: testAccount.user,
-                    pass: testAccount.pass
-                }
-            });
-            logger.info('Using Ethereal Email for testing:', {
-                user: testAccount.user,
-                pass: testAccount.pass
-            });
-        } catch (error) {
-            logger.error('Failed to create test email account:', error);
-        }
-    }
+  // Add attachments if provided
+  if (options.attachments && Array.isArray(options.attachments)) {
+    mailOptions.attachments = options.attachments;
+  }
 
-    async sendWelcomeEmail(userEmail, fullName, temporaryPassword) {
-        if (!this.transporter) {
-            logger.warn('Email transporter not configured. Skipping email send.');
-            return { success: false, message: 'Email service not configured' };
-        }
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Email sent:', info.messageId);
+    return info;
+  } catch (error) {
+    console.error('Error sending email:', error);
+    throw error;
+  }
+};
 
-        try {
-            const mailOptions = {
-                from: process.env.EMAIL_FROM || 'noreply@passwordmanager.com',
-                to: userEmail,
-                subject: 'Welcome to Password Management System - Your Login Credentials',
-                html: this.generateWelcomeEmailTemplate(fullName, userEmail, temporaryPassword)
-            };
+/**
+ * Send welcome email to new users
+ * @param {string} userEmail - User's email address
+ * @param {string} fullName - User's full name
+ * @param {string} temporaryPassword - Temporary password
+ */
+exports.sendWelcomeEmail = async (userEmail, fullName, temporaryPassword) => {
+  const subject = 'Welcome to Password Management System - Your Login Credentials';
+  
+  const text = `
+    Dear ${fullName},
 
-            const info = await this.transporter.sendMail(mailOptions);
-            
-            logger.info('Welcome email sent successfully:', {
-                to: userEmail,
-                messageId: info.messageId
-            });
+    Welcome to the Password Management System! Your account has been successfully created.
 
-            // Log preview URL for Ethereal Email
-            if (process.env.EMAIL_SERVICE !== 'gmail' && process.env.EMAIL_SERVICE !== 'smtp') {
-                logger.info('Preview URL: ' + nodemailer.getTestMessageUrl(info));
-            }
+    Your Login Credentials:
+    Email: ${userEmail}
+    Temporary Password: ${temporaryPassword}
 
-            return { 
-                success: true, 
-                messageId: info.messageId,
-                previewUrl: nodemailer.getTestMessageUrl(info)
-            };
-        } catch (error) {
-            logger.error('Failed to send welcome email:', error);
-            return { success: false, message: error.message };
-        }
-    }
+    Important Security Notice:
+    - Please change your password immediately after your first login
+    - Do not share these credentials with anyone
+    - This email contains sensitive information - please delete it after logging in
 
-    generateWelcomeEmailTemplate(fullName, email, temporaryPassword) {
-        return `
+    Getting Started:
+    1. Visit the Password Management System login page
+    2. Enter your email and temporary password
+    3. Change your password to something secure and memorable
+    4. Start managing your system passwords securely
+
+    If you have any questions or need assistance, please contact your system administrator.
+
+    Best regards,
+    Password Management System
+  `;
+  
+  const html = generateWelcomeEmailTemplate(fullName, userEmail, temporaryPassword);
+  
+  return exports.sendEmail({ to: userEmail, subject, text, html });
+};
+
+/**
+ * Generate HTML template for welcome email
+ * @param {string} fullName - User's full name
+ * @param {string} email - User's email
+ * @param {string} temporaryPassword - Temporary password
+ * @returns {string} HTML template
+ */
+function generateWelcomeEmailTemplate(fullName, email, temporaryPassword) {
+    return `
         <!DOCTYPE html>
         <html lang="en">
         <head>
@@ -198,40 +196,4 @@ class EmailService {
         </body>
         </html>
         `;
-    }
-
-    async getTransporter() {
-        if (!this.transporter) {
-            this.initializeTransporter();
-        }
-        return this.transporter;
-    }
-
-    async verifyConnection() {
-        try {
-            const transporter = await this.getTransporter();
-            if (!transporter) {
-                throw new Error('Email transporter not configured');
-            }
-            await transporter.verify();
-            
-            return {
-                success: true,
-                message: 'Email service connection verified successfully',
-                service: process.env.EMAIL_SERVICE || 'SMTP'
-            };
-        } catch (error) {
-            logger.error('Email service verification failed:', error);
-            return {
-                success: false,
-                error: error.message,
-                message: 'Email service connection failed'
-            };
-        }
-    }
 }
-
-// Create singleton instance
-const emailService = new EmailService();
-
-module.exports = emailService;

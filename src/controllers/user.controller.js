@@ -54,20 +54,18 @@ class UserController {
                     temporaryPassword
                 );
                 
-                if (emailResult.success) {
-                    await ActivityModel.log(
-                        req.user.id,
-                        'WELCOME_EMAIL_SENT',
-                        { 
-                            recipientEmail: user.email, 
-                            messageId: emailResult.messageId,
-                            passwordGenerated: passwordGenerated
-                        },
-                        req.ip
-                    );
-                } else {
-                    console.warn('Failed to send welcome email:', emailResult.message);
-                }
+                await ActivityModel.log(
+                    req.user.id,
+                    'WELCOME_EMAIL_SENT',
+                    { 
+                        recipientEmail: user.email, 
+                        messageId: emailResult.messageId,
+                        passwordGenerated: passwordGenerated
+                    },
+                    req.ip
+                );
+                
+                console.log('Welcome email sent successfully:', emailResult.messageId);
             } catch (emailError) {
                 console.error('Error sending welcome email:', emailError);
                 // Don't fail user creation if email fails
