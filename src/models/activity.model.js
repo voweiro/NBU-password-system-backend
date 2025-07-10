@@ -14,16 +14,21 @@ class ActivityModel {
         return result.rows[0];
     }
 
-    static async getAll() {
-        const result = await db.query(
-            `SELECT al.*, u.email as user_email, u.role as user_role
+    static async getAll(limit = null, offset = 0) {
+        let query = `SELECT al.*, u.email as user_email, u.role as user_role
              FROM activity_logs al 
              LEFT JOIN entries u ON al.user_id = u.id 
              WHERE u.role != 'ultra_admin' 
              AND u.type = 'user'
-             ORDER BY al.created_at DESC`,
-            []
-        );
+             ORDER BY al.created_at DESC`;
+        
+        const params = [];
+        if (limit) {
+            query += ` LIMIT $1 OFFSET $2`;
+            params.push(limit, offset);
+        }
+        
+        const result = await db.query(query, params);
         return result.rows;
     }
 
@@ -64,16 +69,28 @@ class ActivityModel {
     }
 
     // Special method for ultra-admin to view all activities if needed
-    static async getAllIncludingUltraAdmin() {
-        const result = await db.query(
-            `SELECT al.*, u.email as user_email, u.role as user_role
+    static async getAllIncludingUltraAdmin(limit = null, offset = 0) {
+        let query = `SELECT al.*, u.email as user_email, u.role as user_role
              FROM activity_logs al 
              LEFT JOIN entries u ON al.user_id = u.id 
              WHERE u.type = 'user'
-             ORDER BY al.created_at DESC`,
-            []
-        );
+             ORDER BY al.created_at DESC`;
+        
+        const params = [];
+        if (limit) {
+            query += ` LIMIT $1 OFFSET $2`;
+            params.push(limit, offset);
+        }
+        
+        const result = await db.query(query, params);
         return result.rows;
+    }
+
+    static async getCountIncludingUltraAdmin() {
+        const result = await db.query(
+            'SELECT COUNT(*) FROM activity_logs al LEFT JOIN entries u ON al.user_id = u.id WHERE u.type = \'user\''
+        );
+        return parseInt(result.rows[0].count);
     }
 }
 

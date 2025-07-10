@@ -7,14 +7,33 @@ class ActivityController {
             // Check if the requester is an ultra-admin
             const isUltraAdmin = await UserModel.isUltraAdmin(req.user.id);
             
-            // If ultra-admin, they can see all activities including other ultra-admins
+            // Get pagination parameters
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 20;
+            const offset = (page - 1) * limit;
+            
+            // Get activities and total count
             const activities = isUltraAdmin 
-                ? await ActivityModel.getAllIncludingUltraAdmin()
-                : await ActivityModel.getAll();
+                ? await ActivityModel.getAllIncludingUltraAdmin(limit, offset)
+                : await ActivityModel.getAll(limit, offset);
+                
+            const totalCount = isUltraAdmin
+                ? await ActivityModel.getCountIncludingUltraAdmin()
+                : await ActivityModel.getCount();
+            
+            const totalPages = Math.ceil(totalCount / limit);
 
             res.json({
                 success: true,
-                data: activities
+                data: activities,
+                pagination: {
+                    currentPage: page,
+                    totalPages,
+                    totalItems: totalCount,
+                    itemsPerPage: limit,
+                    hasNextPage: page < totalPages,
+                    hasPrevPage: page > 1
+                }
             });
 
         } catch (error) {
