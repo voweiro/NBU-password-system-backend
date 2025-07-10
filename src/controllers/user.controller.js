@@ -11,6 +11,20 @@ class UserController {
                 success: true,
                 data: users.map(user => {
                     delete user.password;
+                    // Parse PostgreSQL arrays to JavaScript arrays
+                    if (user.allowed_categories && typeof user.allowed_categories === 'string') {
+                        user.allowed_categories = user.allowed_categories
+                            .replace(/[{}]/g, '')
+                            .split(',')
+                            .filter(cat => cat.trim() !== '')
+                            .map(cat => cat.trim());
+                    }
+                    if (!user.allowed_categories) {
+                        user.allowed_categories = [];
+                    }
+                    if (!user.allowed_subcategories || typeof user.allowed_subcategories !== 'object') {
+                        user.allowed_subcategories = {};
+                    }
                     return user;
                 })
             });
@@ -72,7 +86,20 @@ class UserController {
             }
 
             // Remove password from response
-            delete user.password;
+            delete user.password;            // Parse PostgreSQL arrays to JavaScript arrays
+            if (user.allowed_categories && typeof user.allowed_categories === 'string') {
+                user.allowed_categories = user.allowed_categories
+                    .replace(/[{}]/g, '')
+                    .split(',')
+                    .filter(cat => cat.trim() !== '')
+                    .map(cat => cat.trim());
+            }
+            if (!user.allowed_categories) {
+                user.allowed_categories = [];
+            }
+            if (!user.allowed_subcategories || typeof user.allowed_subcategories !== 'object') {
+                user.allowed_subcategories = {};
+            }
             
             res.status(201).json({
                 success: true,
@@ -106,6 +133,20 @@ class UserController {
             }
 
             delete user.password;
+            // Parse PostgreSQL arrays to JavaScript arrays
+            if (user.allowed_categories && typeof user.allowed_categories === 'string') {
+                user.allowed_categories = user.allowed_categories
+                    .replace(/[{}]/g, '')
+                    .split(',')
+                    .filter(cat => cat.trim() !== '')
+                    .map(cat => cat.trim());
+            }
+            if (!user.allowed_categories) {
+                user.allowed_categories = [];
+            }
+            if (!user.allowed_subcategories || typeof user.allowed_subcategories !== 'object') {
+                user.allowed_subcategories = {};
+            }
             res.json({
                 success: true,
                 data: user
@@ -143,6 +184,20 @@ class UserController {
             );
 
             delete updatedUser.password;
+            // Parse PostgreSQL arrays to JavaScript arrays
+            if (updatedUser.allowed_categories && typeof updatedUser.allowed_categories === 'string') {
+                updatedUser.allowed_categories = updatedUser.allowed_categories
+                    .replace(/[{}]/g, '')
+                    .split(',')
+                    .filter(cat => cat.trim() !== '')
+                    .map(cat => cat.trim());
+            }
+            if (!updatedUser.allowed_categories) {
+                updatedUser.allowed_categories = [];
+            }
+            if (!updatedUser.allowed_subcategories || typeof updatedUser.allowed_subcategories !== 'object') {
+                updatedUser.allowed_subcategories = {};
+            }
             res.json({
                 success: true,
                 data: updatedUser
