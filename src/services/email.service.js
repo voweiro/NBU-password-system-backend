@@ -168,6 +168,7 @@ function generateWelcomeEmailTemplate(fullName, email, temporaryPassword) {
                     </div>
                     <div class="credential-item">
                         <strong>Temporary Password:</strong> ${temporaryPassword}
+                        <stron>   use this link to login: https://nbu-password-system-frontend.vercel.app</strong>
                     </div>
                 </div>
 
