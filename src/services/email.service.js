@@ -155,7 +155,7 @@ function generateWelcomeEmailTemplate(fullName, email, temporaryPassword) {
         </head>
         <body>
             <div class="header">
-                <h1>🔐 Welcome to Password Management System</h1>
+                <h1>🔐 Welcome to the Nigerian British Univeristy Password Management System</h1>
             </div>
             <div class="content">
                 <h2>Hello ${fullName},</h2>
