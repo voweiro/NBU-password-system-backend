@@ -11,6 +11,7 @@ const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const systemRoutes = require('./routes/system.routes');
 const activityRoutes = require('./routes/activity.routes');
+const emailRoutes = require('./routes/email.routes');
 
 const app = express();
 
@@ -49,6 +50,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/systems', systemRoutes);
 app.use('/api/activities', activityRoutes);
+app.use('/api/email', emailRoutes);
 
 // Error handling
 app.use(errorHandler);
@@ -69,4 +71,4 @@ const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
     logger.info(`Server is running on port ${PORT}`);
-}); 
+});

@@ -1,5 +1,7 @@
 const UserModel = require('../models/user.model');
 const ActivityModel = require('../models/activity.model');
+const emailService = require('../services/email.service');
+const crypto = require('crypto');
 
 class UserController {
     static async getAllUsers(req, res, next) {
@@ -19,7 +21,24 @@ class UserController {
 
     static async createUser(req, res, next) {
         try {
-            const user = await UserModel.create(req.body);
+            // Generate a temporary password if not provided
+            let temporaryPassword = req.body.password;
+            let passwordGenerated = false;
+            
+            if (!temporaryPassword) {
+                temporaryPassword = crypto.randomBytes(8).toString('hex');
+                passwordGenerated = true;
+            }
+
+            // Create user with the password
+            const userData = {
+                ...req.body,
+                password: temporaryPassword
+            };
+            
+            const user = await UserModel.create(userData);
+            
+            // Log user creation activity
             await ActivityModel.log(
                 req.user.id,
                 'USER_CREATED',
@@ -27,10 +46,42 @@ class UserController {
                 req.ip
             );
 
+            // Send welcome email with login credentials
+            try {
+                const emailResult = await emailService.sendWelcomeEmail(
+                    user.email,
+                    user.full_name,
+                    temporaryPassword
+                );
+                
+                if (emailResult.success) {
+                    await ActivityModel.log(
+                        req.user.id,
+                        'WELCOME_EMAIL_SENT',
+                        { 
+                            recipientEmail: user.email, 
+                            messageId: emailResult.messageId,
+                            passwordGenerated: passwordGenerated
+                        },
+                        req.ip
+                    );
+                } else {
+                    console.warn('Failed to send welcome email:', emailResult.message);
+                }
+            } catch (emailError) {
+                console.error('Error sending welcome email:', emailError);
+                // Don't fail user creation if email fails
+            }
+
+            // Remove password from response
             delete user.password;
+            
             res.status(201).json({
                 success: true,
-                data: user
+                data: user,
+                message: passwordGenerated 
+                    ? 'User created successfully. Login credentials have been sent via email.'
+                    : 'User created successfully with provided password. Login credentials have been sent via email.'
             });
         } catch (error) {
             next(error);
@@ -131,4 +182,4 @@ class UserController {
     }
 }
 
-module.exports = UserController; 
+module.exports = UserController;

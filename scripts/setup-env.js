@@ -93,6 +93,18 @@ RATE_LIMIT_MAX=100
 
 # Logging
 LOG_LEVEL=info
+
+# Email Configuration
+# Options: 'gmail', 'smtp', or leave empty for test mode
+EMAIL_SERVICE=
+EMAIL_USER=
+EMAIL_PASSWORD=
+EMAIL_FROM=noreply@passwordmanager.com
+
+# SMTP Configuration (only needed if EMAIL_SERVICE=smtp)
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_SECURE=false
 `;
 
 const askQuestion = (question) => {
@@ -125,4 +137,4 @@ const setup = async () => {
     rl.close();
 };
 
-setup(); 
+setup();
