@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const db = require('../config/database');
 const { auth } = require('../middlewares/auth');
-const { logActivity } = require('../utils/logger');
+const ActivityModel = require('../models/activity.model');
 
 const router = express.Router();
 
@@ -84,10 +84,9 @@ router.post('/change-password', auth, async (req, res) => {
         const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
         if (!isCurrentPasswordValid) {
             // Log failed password change attempt
-            await logActivity(userId, 'password_change_failed', {
-                reason: 'Invalid current password',
-                ip_address: req.ip
-            });
+            await ActivityModel.log(userId, 'password_change_failed', {
+                reason: 'Invalid current password'
+            }, req.ip);
             
             return res.status(400).json({ 
                 message: 'Current password is incorrect' 
@@ -116,10 +115,9 @@ router.post('/change-password', auth, async (req, res) => {
         await db.query(updateQuery, [hashedNewPassword, userId]);
         
         // Log successful password change
-        await logActivity(userId, 'password_changed', {
-            message: 'Password changed successfully',
-            ip_address: req.ip
-        });
+        await ActivityModel.log(userId, 'password_changed', {
+            message: 'Password changed successfully'
+        }, req.ip);
         
         res.json({
             success: true,
@@ -131,10 +129,9 @@ router.post('/change-password', auth, async (req, res) => {
         
         // Log error
         if (req.user && req.user.id) {
-            await logActivity(req.user.id, 'password_change_error', {
-                error: error.message,
-                ip_address: req.ip
-            });
+            await ActivityModel.log(req.user.id, 'password_change_error', {
+                error: error.message
+            }, req.ip);
         }
         
         res.status(500).json({ message: 'Internal server error' });
@@ -185,10 +182,9 @@ router.put('/update', auth, async (req, res) => {
         }
         
         // Log profile update
-        await logActivity(userId, 'profile_updated', {
-            updated_fields: Object.keys(req.body),
-            ip_address: req.ip
-        });
+        await ActivityModel.log(userId, 'profile_updated', {
+            updated_fields: Object.keys(req.body)
+        }, req.ip);
         
         res.json({
             success: true,

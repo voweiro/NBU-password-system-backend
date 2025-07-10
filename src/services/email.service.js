@@ -58,7 +58,7 @@ exports.sendWelcomeEmail = async (userEmail, fullName, temporaryPassword) => {
   const text = `
     Dear ${fullName},
 
-    Welcome to the Password Management System! Your account has been successfully created.
+    Welcome to the Nigerian British University Password Management System Your account has been successfully created.
 
     Your Login Credentials:
     Email: ${userEmail}
