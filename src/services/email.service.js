@@ -63,6 +63,8 @@ exports.sendWelcomeEmail = async (userEmail, fullName, temporaryPassword) => {
     Your Login Credentials:
     Email: ${userEmail}
     Temporary Password: ${temporaryPassword}
+    use this link to login: https://nbu-password-system-frontend.vercel.app
+    Please note that this is a temporary password. You will be required to change it upon your first login.
 
     Important Security Notice:
     - Please change your password immediately after your first login
