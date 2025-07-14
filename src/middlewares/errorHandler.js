@@ -54,6 +54,22 @@ const errorHandler = (err, req, res, next) => {
         });
     }
 
+    // Handle authorization errors
+    if (err.message.includes('Not authorized') || err.message.includes('category restriction')) {
+        return res.status(403).json({
+            success: false,
+            message: err.message
+        });
+    }
+
+    // Handle system not found errors
+    if (err.message === 'System not found') {
+        return res.status(404).json({
+            success: false,
+            message: err.message
+        });
+    }
+
     return res.status(500).json({
         success: false,
         message: 'Internal server error'
