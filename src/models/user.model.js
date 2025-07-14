@@ -165,7 +165,12 @@ class UserModel {
                     return null;
                 }
 
-                // Delete related activity logs first
+                // Set created_by to NULL for all systems created by this user
+                // This preserves the systems while removing the foreign key reference
+                const nullifySystemsQuery = 'UPDATE entries SET created_by = NULL WHERE created_by = $1 AND type = $2';
+                await db.query(nullifySystemsQuery, [id, 'system']);
+
+                // Delete related activity logs
                 const deleteLogsQuery = 'DELETE FROM activity_logs WHERE user_id = $1';
                 await db.query(deleteLogsQuery, [id]);
 

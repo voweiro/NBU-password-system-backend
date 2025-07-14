@@ -20,7 +20,7 @@ pool.connect((err, client, release) => {
     if (err) {
         console.error('Error connecting to the database:', err.stack);
     } else {
-        console.log('Successfully connected to Supabase database');
+        // Database connection established
         release();
     }
 });
@@ -34,4 +34,4 @@ pool.on('error', (err) => {
 module.exports = {
     query: (text, params) => pool.query(text, params),
     pool // Export the pool in case we need direct access
-}; 
+};

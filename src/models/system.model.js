@@ -168,7 +168,7 @@ class SystemModel {
             ORDER BY s.created_at DESC
         `;
         const result = await db.query(query);
-        console.log('Found systems:', result.rows.length);
+        // Systems retrieved successfully
         return result.rows;
     }
 
@@ -278,4 +278,4 @@ class SystemModel {
     }
 }
 
-module.exports = SystemModel; 
+module.exports = SystemModel;

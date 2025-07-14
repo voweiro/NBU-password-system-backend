@@ -79,7 +79,7 @@ class UserController {
                     req.ip
                 );
                 
-                console.log('Welcome email sent successfully:', emailResult.messageId);
+                // Welcome email sent successfully
             } catch (emailError) {
                 console.error('Error sending welcome email:', emailError);
                 // Don't fail user creation if email fails
