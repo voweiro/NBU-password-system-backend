@@ -99,8 +99,7 @@ class SystemController {
     static async getSystemsByCategory(req, res, next) {
         try {
             const { category } = req.params;
-            const allSystems = await SystemService.getAccessibleSystems(req.user.id);
-            const systems = allSystems.filter(system => system.category === category);
+            const systems = await SystemService.getSystemsByCategory(category, req.user.id);
             
             res.json({
                 success: true,
@@ -112,4 +111,4 @@ class SystemController {
     }
 }
 
-module.exports = SystemController; 
+module.exports = SystemController;
