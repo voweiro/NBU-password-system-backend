@@ -209,21 +209,33 @@ class UserController {
 
     static async deleteUser(req, res, next) {
         try {
-            const user = await UserModel.delete(req.params.id);
+            // First get the user details before deletion
+            const userToDelete = await UserModel.findById(req.params.id);
             
-            if (!user) {
+            if (!userToDelete) {
                 return res.status(404).json({
                     success: false,
                     message: 'User not found'
                 });
             }
 
+            // Log the deletion activity BEFORE actually deleting the user
             await ActivityModel.log(
                 req.user.id,
                 'USER_DELETED',
-                { deletedUserId: user.id, email: user.email },
+                { deletedUserId: userToDelete.id, email: userToDelete.email },
                 req.ip
             );
+
+            // Now delete the user
+            const deletedUser = await UserModel.delete(req.params.id);
+            
+            if (!deletedUser) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'User not found or could not be deleted'
+                });
+            }
 
             res.json({
                 success: true,
