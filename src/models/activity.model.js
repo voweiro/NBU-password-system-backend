@@ -14,21 +14,15 @@ class ActivityModel {
         return result.rows[0];
     }
 
-    static async getAll(limit = null, offset = 0) {
-        let query = `SELECT al.*, u.email as user_email, u.role as user_role
+    static async getAll() {
+        const query = `SELECT al.*, u.email as user_email, u.role as user_role
              FROM activity_logs al 
              LEFT JOIN entries u ON al.user_id = u.id 
              WHERE u.role != 'ultra_admin' 
              AND u.type = 'user'
              ORDER BY al.created_at DESC`;
         
-        const params = [];
-        if (limit) {
-            query += ` LIMIT $1 OFFSET $2`;
-            params.push(limit, offset);
-        }
-        
-        const result = await db.query(query, params);
+        const result = await db.query(query);
         return result.rows;
     }
 
@@ -69,20 +63,14 @@ class ActivityModel {
     }
 
     // Special method for ultra-admin to view all activities if needed
-    static async getAllIncludingUltraAdmin(limit = null, offset = 0) {
-        let query = `SELECT al.*, u.email as user_email, u.role as user_role
+    static async getAllIncludingUltraAdmin() {
+        const query = `SELECT al.*, u.email as user_email, u.role as user_role
              FROM activity_logs al 
              LEFT JOIN entries u ON al.user_id = u.id 
              WHERE u.type = 'user'
              ORDER BY al.created_at DESC`;
         
-        const params = [];
-        if (limit) {
-            query += ` LIMIT $1 OFFSET $2`;
-            params.push(limit, offset);
-        }
-        
-        const result = await db.query(query, params);
+        const result = await db.query(query);
         return result.rows;
     }
 
