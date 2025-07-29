@@ -22,7 +22,7 @@ app.set('trust proxy', 1);
 // Security middleware
 app.use(helmet());
 
-const allowedOrigins = ['https://nbu-password-system-frontend.vercel.app', 'http://localhost:3000'];
+const allowedOrigins = ['https://nbu-password-system-frontend.vercel.app', 'http://localhost:3000', 'https://password-management-system.nbu.edu.ng'];
 app.use(cors({
     origin: function(origin, callback){
         if(!origin) return callback(null, true);
